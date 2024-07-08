@@ -16,3 +16,4 @@ In this 3D game, you will navigate through various levels, each designed to teac
 
 - **3D Libraries**: The game is built using React Three Fiber, which provide the foundation for creating a rich, immersive 3D environment.
 - **Audio Integration**: Japanese audio files are integrated to provide clear pronunciation guides, helping you to learn correct pronunciations.
+![intro](https://github.com/Anastasia520/3D-game-for-learning-the-Japanese-alphabet/assets/49147515/5892c7e2-ca2f-40eb-b5f6-094f25f27a03)
