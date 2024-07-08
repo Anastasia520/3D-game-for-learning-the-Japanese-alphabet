@@ -1,8 +1,14 @@
+import {
+  KeyboardControls,
+  Loader,
+  useFont,
+  useProgress,
+} from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { Experience } from "./components/Experience";
-import { Suspense, useMemo } from "react";
 import { Physics } from "@react-three/rapier";
-import { KeyboardControls } from "@react-three/drei";
+import { Leva } from "leva";
+import { Suspense, useMemo } from "react";
+import { Experience } from "./components/Experience";
 import { Menu } from "./components/Menu";
 
 export const Controls = {
@@ -14,6 +20,7 @@ export const Controls = {
 };
 
 function App() {
+  useFont.preload("./fonts/Noto Sans JP ExtraBold_Regular.json");
   const map = useMemo(
     () => [
       { name: Controls.forward, keys: ["ArrowUp", "KeyW"] },
@@ -25,18 +32,20 @@ function App() {
     []
   );
 
+  const { progress } = useProgress();
   return (
     <KeyboardControls map={map}>
-      <Canvas shadows camera={{ position: [6, 14, 40], fov: 42 }}>
-        <color attach="background" args={["#dbecfd"]} />
-        <fog attach="fog" args={["#dbecfd", 30, 40]} />
+      <Leva hidden />
+      <Canvas shadows camera={{ position: [0, 20, 14], fov: 42 }}>
+        <color attach="background" args={["#e3daf7"]} />
         <Suspense>
-          <Physics debug>
+          <Physics>
             <Experience />
           </Physics>
         </Suspense>
       </Canvas>
-
+      <Loader />
+      {progress === 100 && <Menu />}
       <Menu />
     </KeyboardControls>
   );

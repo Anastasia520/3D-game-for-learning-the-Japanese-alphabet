@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { CapsuleCollider, RigidBody, vec3 } from "@react-three/rapier";
 import { useEffect, useRef } from "react";
 import { Controls } from "../App";
-import { playAudio, useGameStore } from "../store";
+import { gameStates, playAudio, useGameStore } from "../store";
 import Character from "./Character";
 
 import * as THREE from "three";
@@ -11,8 +11,16 @@ import * as THREE from "three";
 const JUMP_FORCE = 0.5;
 const MOVEMENT_SPEED = 0.1;
 const MAX_VEL = 3;
+const RUN_VEL = 1.5;
 
 export const CharacterController = () => {
+  const { characterState, setCharacterState, gameState } = useGameStore(
+    (state) => ({
+      character: state.characterState,
+      setCharacterState: state.setCharacterState,
+      gameState: state.gameState,
+    })
+  );
   const jumpPressed = useKeyboardControls((state) => state[Controls.jump]);
   const leftPressed = useKeyboardControls((state) => state[Controls.left]);
   const rightPressed = useKeyboardControls((state) => state[Controls.right]);
@@ -23,7 +31,7 @@ export const CharacterController = () => {
   const rigidbody = useRef();
   const isOnFloor = useRef(true);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const impulse = { x: 0, y: 0, z: 0 };
     if (jumpPressed && isOnFloor.current) {
       impulse.y += JUMP_FORCE;
@@ -50,6 +58,17 @@ export const CharacterController = () => {
     }
 
     rigidbody.current.applyImpulse(impulse, true);
+
+    if (Math.abs(linvel.x) > RUN_VEL || Math.abs(linvel.z) > RUN_VEL) {
+      if (characterState !== "Run") {
+        setCharacterState("Run");
+      }
+    } else {
+      if (characterState !== "Idle") {
+        setCharacterState("Idle");
+      }
+    }
+
     if (changeRotation) {
       const angle = Math.atan2(linvel.x, linvel.z);
       character.current.rotation.y = angle;
@@ -59,8 +78,21 @@ export const CharacterController = () => {
     const characterWorldPosition = character.current.getWorldPosition(
       new THREE.Vector3()
     );
-    state.camera.position.x = characterWorldPosition.x;
-    state.camera.position.z = characterWorldPosition.z + 14;
+
+    const targetCameraPosition = new THREE.Vector3(
+      characterWorldPosition.x,
+      0,
+      characterWorldPosition.z + 14
+    );
+
+    if (gameState === gameStates.GAME) {
+      targetCameraPosition.y = 6;
+    }
+    if (gameState !== gameStates.GAME) {
+      targetCameraPosition.y = 0;
+    }
+
+    state.camera.position.lerp(targetCameraPosition, delta * 2);
 
     const targetLookAt = new THREE.Vector3(
       characterWorldPosition.x,
@@ -68,7 +100,18 @@ export const CharacterController = () => {
       characterWorldPosition.z
     );
 
-    state.camera.lookAt(targetLookAt);
+    const direction = new THREE.Vector3();
+    state.camera.getWorldDirection(direction);
+
+    const position = new THREE.Vector3();
+    state.camera.getWorldPosition(position);
+
+    const currentLookAt = position.clone().add(direction);
+    const lerpedLookAt = new THREE.Vector3();
+
+    lerpedLookAt.lerpVectors(currentLookAt, targetLookAt, delta * 2);
+
+    state.camera.lookAt(lerpedLookAt);
   });
 
   const character = useRef();

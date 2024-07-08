@@ -20,7 +20,7 @@ export const Kicker = () => {
     const curRotation = quat(kicker.current.rotation());
     const incrementRotation = new THREE.Quaternion().setFromAxisAngle(
       new THREE.Vector3(0, 1, 0),
-      delta * 8
+      delta * 4 // SPEED
     );
     curRotation.multiply(incrementRotation);
     kicker.current.setNextKinematicRotation(curRotation);

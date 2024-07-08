@@ -13,18 +13,21 @@ export const Menu = () => {
           gameState !== gameStates.MENU ? "menu--hidden" : ""
         }`}
       >
-        <h1>Kana game</h1>
+        <div>
+          <h1>Kana Game</h1>
+          <p>What do you want to practice today?</p>
+        </div>
         <button
           disabled={gameState !== gameStates.MENU}
           onClick={() => startGame({ mode: "hiragana" })}
         >
-          Start hiragana game
+          Hiragana
         </button>
         <button
           disabled={gameState !== gameStates.MENU}
           onClick={() => startGame({ mode: "katakana" })}
         >
-          Start katakana game
+          Katakana
         </button>
       </div>
       <div
